@@ -13,11 +13,11 @@ class PageData(TypedDict):
 
 def normalize_url(url):
     parsed = urlsplit(url)
-    return parsed.netloc + parsed.path.rstrip("/")
+    return parsed.netloc.lower() + parsed.path.rstrip("/")
 
 
-def get_heading_from_html(html: str) -> str:
-    soup = BeautifulSoup(html, "html.parser")
+def get_heading_from_html(html: str | BeautifulSoup) -> str:
+    soup = html if isinstance(html, BeautifulSoup) else BeautifulSoup(html, "html.parser")
 
     h_tag = soup.find("h1")
 
@@ -27,8 +27,8 @@ def get_heading_from_html(html: str) -> str:
     return h_tag.get_text(strip=True) if isinstance(h_tag, Tag) else ""
 
 
-def get_first_paragraph_from_html(html: str) -> str:
-    soup = BeautifulSoup(html, "html.parser")
+def get_first_paragraph_from_html(html: str | BeautifulSoup) -> str:
+    soup = html if isinstance(html, BeautifulSoup) else BeautifulSoup(html, "html.parser")
 
     main = soup.find("main")
 
@@ -41,7 +41,7 @@ def get_first_paragraph_from_html(html: str) -> str:
 
 
 def get_urls_from_html(html, base_url):
-    soup = BeautifulSoup(html, "html.parser")
+    soup = html if isinstance(html, BeautifulSoup) else BeautifulSoup(html, "html.parser")
 
     urls = []
 
@@ -55,7 +55,7 @@ def get_urls_from_html(html, base_url):
 
 
 def get_images_from_html(html, base_url):
-    soup = BeautifulSoup(html, "html.parser")
+    soup = html if isinstance(html, BeautifulSoup) else BeautifulSoup(html, "html.parser")
 
     images = []
 
@@ -69,10 +69,11 @@ def get_images_from_html(html, base_url):
 
 
 def extract_page_data(html: str, page_url: str) -> PageData:
+    soup = BeautifulSoup(html, "html.parser")
     return {
         "url": page_url,
-        "heading": get_heading_from_html(html),
-        "first_paragraph": get_first_paragraph_from_html(html),
-        "outgoing_links": get_urls_from_html(html, page_url),
-        "image_urls": get_images_from_html(html, page_url),
+        "heading": get_heading_from_html(soup),
+        "first_paragraph": get_first_paragraph_from_html(soup),
+        "outgoing_links": get_urls_from_html(soup, page_url),
+        "image_urls": get_images_from_html(soup, page_url),
     }
