@@ -12,7 +12,7 @@ import requests
 from crawl import extract_page_data, normalize_url
 from json_report import write_json_report
 
-USER_AGENT = "BootCrawler/2.0"
+USER_AGENT = "SiteLens/2.0"
 
 
 def get_html(url):
