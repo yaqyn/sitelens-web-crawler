@@ -1,5 +1,5 @@
 [project]
-name = "sitelens"
+name = "sitelens-web-crawler"
 version = "0.1.0"
 description = "A bounded async website crawler with robots policies and JSON reports"
 readme = "README.md"
