@@ -1,6 +1,6 @@
-![Web Crawler — a brass survey instrument exploring linked pages across a midnight atlas](readme-assets/cover.png)
+![SiteLens — a brass survey instrument exploring linked pages across a midnight atlas](readme-assets/cover.png)
 
-# Async Web Crawler
+# SiteLens
 
 **Collect a website’s headings, links, and images into a structured JSON report.**
 
