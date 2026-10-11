@@ -9,7 +9,7 @@
 
 Start with a URL and follow links on the same network location. A fixed worker pool shares a bounded frontier while visited-page tracking prevents duplicate work. The crawler extracts page data and writes it in URL order to `report.json`.
 
-[Run a crawl](#quick-start)
+[Run a crawl](#-quick-start)
 
 ## <img src="readme-assets/icons/launch.svg" width="24" height="24" alt=""> Quick start
 
