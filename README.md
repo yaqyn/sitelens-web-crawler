@@ -85,4 +85,4 @@ This project explores async workers, queues, shared state, cancellation, request
 
 ---
 
-Built by **[Abdulrahman M. Yaqyn](https://yaqyn.dev)** through the [Boot.dev](https://www.boot.dev) curriculum.
+Built by **[Abdulrahman M. Yaqyn](https://yaqyn.github.io/folio-static-site/)** through the [Boot.dev](https://www.boot.dev) curriculum.
