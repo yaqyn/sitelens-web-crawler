@@ -17,6 +17,8 @@ Start with a URL and follow links on the same network location. A fixed worker p
 
 ## <img src="readme-assets/icons/installation.svg" width="24" height="24" alt=""> Installation
 
+Clone with `git clone https://github.com/yaqyn/sitelens-web-crawler.git`, then run the commands below from `sitelens-web-crawler/`.
+
 Requires **Python 3.13+** and **uv**.
 
 The launcher prepares the Python environment with uv automatically.
@@ -31,7 +33,11 @@ The launcher prepares the Python environment with uv automatically.
 uv run main.py BASE_URL [MAX_CONCURRENCY] [MAX_PAGES]
 ```
 
-The launcher prepares the Python environment with uv automatically. Run `./launch` without arguments to enter a URL interactively. It works from any directory when invoked by absolute path. You can also use `uv run main.py` with the same arguments.
+Run `./launch` without arguments to enter a URL interactively. It works from any directory when invoked by absolute path. You can also use `uv run main.py` with the same arguments.
+
+A successful crawl prints a summary and writes `report.json` in the current directory. Stop with **Ctrl+C**; interrupted crawls do not replace the report.
+
+## <img src="readme-assets/icons/usage.svg" width="24" height="24" alt=""> Usage
 
 Defaults are **5 workers** and **100 scheduled URLs**. Use positive integers. Failed fetches count toward the scheduled URL limit, so the report may contain fewer pages. The command reports crawl progress and writes `report.json` in the current directory. It fetches the seed only once, without dumping its HTML.
 
@@ -73,7 +79,7 @@ A bounded frontier feeds asynchronous workers; extracted page records become a U
 
 <sub>Local demonstration fixture; no live website data.</sub>
 
-## <img src="readme-assets/icons/structure.svg" width="24" height="24" alt=""> Project structure and limitations
+## <img src="readme-assets/icons/structure.svg" width="24" height="24" alt=""> Project structure
 
 | File | Responsibility |
 | --- | --- |
@@ -83,8 +89,6 @@ A bounded frontier feeds asynchronous workers; extracted page records become a U
 | `test_crawl.py` | Extraction compatibility tests |
 | `test_async_crawler.py` | Local HTTP integration, scheduling, cancellation, CLI, and report tests |
 
-The crawler processes HTML responses without rendering JavaScript. Visit identity uses the network location and path, ignoring query strings and trailing slashes. Outgoing links can appear in the report even when their destinations are outside the crawl scope. The frontier holds at most the configured number of scheduled URLs, and only the fixed workers fetch pages. HTML extraction parses each page once. Requests use a shared [aiohttp session](https://docs.aiohttp.org/en/stable/client_quickstart.html).
-
 ## <img src="readme-assets/icons/verification.svg" width="24" height="24" alt=""> Verification
 
 ```bash
@@ -92,6 +96,10 @@ uv run python -m unittest -v
 ```
 
 Tests use a local HTTP server and require no external websites. GitHub Actions runs them on every push and pull request.
+
+## <img src="readme-assets/icons/security.svg" width="24" height="24" alt=""> Security and limitations
+
+The crawler processes HTML responses without rendering JavaScript. Visit identity uses the network location and path, ignoring query strings and trailing slashes. Outgoing links can appear in the report even when their destinations are outside the crawl scope. The frontier holds at most the configured number of scheduled URLs, and only the fixed workers fetch pages. HTML extraction parses each page once. Requests use a shared [aiohttp session](https://docs.aiohttp.org/en/stable/client_quickstart.html).
 
 This project explores async workers, queues, shared state, cancellation, request policies, HTML parsing, and structured output.
 
