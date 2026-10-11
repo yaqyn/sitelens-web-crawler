@@ -11,9 +11,20 @@ Start with a URL and follow links on the same network location. A fixed worker p
 
 [Run a crawl](#-quick-start)
 
-## <img src="readme-assets/icons/launch.svg" width="24" height="24" alt=""> Quick start
+## <img src="readme-assets/icons/features.svg" width="24" height="24" alt=""> Features
+
+- Extract headings, links, images, and a representative paragraph.
+- Bound crawl work with page, depth, concurrency, and request limits.
+- Respect robots.txt and keep failures in a separate report.
+- Write deterministic JSON output with atomic replacement.
+
+## <img src="readme-assets/icons/installation.svg" width="24" height="24" alt=""> Installation
 
 Requires **Python 3.13+** and **uv**.
+
+The launcher prepares the Python environment with uv automatically.
+
+## <img src="readme-assets/icons/launch.svg" width="24" height="24" alt=""> Quick start
 
 ```bash
 ./launch https://learnwebscraping.dev/practice/ecommerce/ 3 20 --delay 0.5
@@ -46,13 +57,6 @@ Defaults are **5 workers** and **100 scheduled URLs**. Use positive integers. Fa
 Robots.txt is checked by default, including before following redirects. A missing file (404) allows crawling; other HTTP failures, redirects on robots.txt, or connection errors block the crawl. A declared `Crawl-delay` raises the configured request interval. Parsing uses Python's [RobotFileParser](https://docs.python.org/3/library/urllib.robotparser.html); this is not a complete implementation of every robots directive.
 
 Redirects are followed only within the original network location and relative links use the final page URL. The original report field names are preserved. Report replacement is atomic, so a failed serialization leaves an existing report intact. A run with no successful pages returns exit status 1; partial success returns 0 and failures are available through `--errors`. Ctrl+C returns 130 and closes workers and connections; interrupted crawls do not write a new report.
-
-## <img src="readme-assets/icons/features.svg" width="24" height="24" alt=""> Features
-
-- Extract headings, links, images, and a representative paragraph.
-- Bound crawl work with page, depth, concurrency, and request limits.
-- Respect robots.txt and keep failures in a separate report.
-- Write deterministic JSON output with atomic replacement.
 
 ## <img src="readme-assets/icons/workflow.svg" width="24" height="24" alt=""> Report workflow
 
