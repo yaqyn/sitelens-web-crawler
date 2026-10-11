@@ -2,7 +2,7 @@
 
 # SiteLens — Web Crawler
 
-> **Learning Journey Projects · Boot.dev**
+> **Learning Journey Project · Boot.dev**
 > A student project developed through the Boot.dev curriculum and extended through hands-on practice.
 
 **Collect a website’s headings, links, and images into a structured JSON report.**
