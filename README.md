@@ -2,9 +2,6 @@
 
 # SiteLens — Web Crawler
 
-> **Learning Journey Project · Boot.dev**
-> Developed through the Boot.dev curriculum and extended through independent work.
-
 **Collect a website’s headings, links, and images into a structured JSON report.**
 
 Start with a URL and follow links on the same network location. A fixed worker pool shares a bounded frontier while visited-page tracking prevents duplicate work. The crawler extracts page data and writes it in URL order to `report.json`.
@@ -101,3 +98,6 @@ This project explores async workers, queues, shared state, cancellation, request
 ---
 
 Built by **[Abdulrahman M. Yaqyn](https://yaqyn.github.io/folio-static-site/)**.
+
+> **Learning Journey Project · Boot.dev**
+> Developed through the Boot.dev curriculum and extended through independent work.
