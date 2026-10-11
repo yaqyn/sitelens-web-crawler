@@ -3,13 +3,15 @@
 # SiteLens — Web Crawler
 
 > **Learning Journey Project · Boot.dev**
-> A student project developed through the Boot.dev curriculum and extended through hands-on practice.
+> Developed through the Boot.dev curriculum and extended through independent work.
 
 **Collect a website’s headings, links, and images into a structured JSON report.**
 
 Start with a URL and follow links on the same network location. A fixed worker pool shares a bounded frontier while visited-page tracking prevents duplicate work. The crawler extracts page data and writes it in URL order to `report.json`.
 
-## <img src="readme-assets/run.svg" width="24" height="24" alt=""> Start a crawl
+[Run a crawl](#quick-start)
+
+## <img src="readme-assets/icons/launch.svg" width="24" height="24" alt=""> Quick start
 
 Requires **Python 3.13+** and **uv**.
 
@@ -45,7 +47,16 @@ Robots.txt is checked by default, including before following redirects. A missin
 
 Redirects are followed only within the original network location and relative links use the final page URL. The original report field names are preserved. Report replacement is atomic, so a failed serialization leaves an existing report intact. A run with no successful pages returns exit status 1; partial success returns 0 and failures are available through `--errors`. Ctrl+C returns 130 and closes workers and connections; interrupted crawls do not write a new report.
 
-## <img src="readme-assets/design.svg" width="24" height="24" alt=""> Follow the links, keep the structure
+## <img src="readme-assets/icons/features.svg" width="24" height="24" alt=""> Features
+
+- Extract headings, links, images, and a representative paragraph.
+- Bound crawl work with page, depth, concurrency, and request limits.
+- Respect robots.txt and keep failures in a separate report.
+- Write deterministic JSON output with atomic replacement.
+
+## <img src="readme-assets/icons/workflow.svg" width="24" height="24" alt=""> Report workflow
+
+A bounded frontier feeds asynchronous workers; extracted page records become a URL-sorted JSON report.
 
 ![Crawler workflow: seed, concurrent fetch, extraction, JSON](readme-assets/workflow.svg)
 
@@ -61,7 +72,7 @@ Redirects are followed only within the original network location and relative li
 
 <sub>Local demonstration fixture; no live website data.</sub>
 
-## <img src="readme-assets/code.svg" width="24" height="24" alt=""> Explore the implementation
+## <img src="readme-assets/icons/structure.svg" width="24" height="24" alt=""> Project structure and limitations
 
 | File | Responsibility |
 | --- | --- |
@@ -73,7 +84,7 @@ Redirects are followed only within the original network location and relative li
 
 The crawler processes HTML responses without rendering JavaScript. Visit identity uses the network location and path, ignoring query strings and trailing slashes. Outgoing links can appear in the report even when their destinations are outside the crawl scope. The frontier holds at most the configured number of scheduled URLs, and only the fixed workers fetch pages. HTML extraction parses each page once. Requests use a shared [aiohttp session](https://docs.aiohttp.org/en/stable/client_quickstart.html).
 
-## <img src="readme-assets/learn.svg" width="24" height="24" alt=""> Verify the crawler
+## <img src="readme-assets/icons/verification.svg" width="24" height="24" alt=""> Verification
 
 ```bash
 uv run python -m unittest -v
@@ -85,4 +96,4 @@ This project explores async workers, queues, shared state, cancellation, request
 
 ---
 
-Built by **[Abdulrahman M. Yaqyn](https://yaqyn.github.io/folio-static-site/)** through the [Boot.dev](https://www.boot.dev) curriculum.
+Built by **[Abdulrahman M. Yaqyn](https://yaqyn.github.io/folio-static-site/)**.
