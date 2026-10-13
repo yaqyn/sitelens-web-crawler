@@ -1,4 +1,4 @@
-![SiteLens — a brass survey instrument exploring linked pages across a midnight atlas](readme-assets/cover-renamed.png)
+![SiteLens — a brass survey instrument exploring linked pages across a midnight atlas](readme-assets/cover-renamed.webp)
 
 # SiteLens — Web Crawler
 
