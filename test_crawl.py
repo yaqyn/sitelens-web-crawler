@@ -11,6 +11,11 @@ from crawl import (
 
 class TestCrawl(unittest.TestCase):
 
+    def test_inline_elements_preserve_word_boundaries(self):
+        html = "<h1>Hello <em>world</em> today</h1><p>Read <a href='/'>this guide</a> now.</p>"
+        self.assertEqual(get_heading_from_html(html), "Hello world today")
+        self.assertEqual(get_first_paragraph_from_html(html), "Read this guide now.")
+
     # normalize_url tests
 
     def test_normalize_url_https(self):

@@ -10,7 +10,7 @@ Start with a URL and follow links on the same network location. A fixed worker p
 
 ## <img src="readme-assets/icons/features.svg" width="24" height="24" alt=""> Features
 
-- Extract headings, links, images, and a representative paragraph.
+- Extract headings, links, images, and a representative paragraph, preserving word boundaries across inline elements.
 - Bound crawl work with page, depth, concurrency, and request limits.
 - Respect robots.txt and keep failures in a separate report.
 - Write deterministic JSON output with atomic replacement.
