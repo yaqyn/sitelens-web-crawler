@@ -25,6 +25,8 @@ def get_html(url):
 
 
 def validate_url(url):
+    if any(ord(char) < 32 or ord(char) == 127 for char in url):
+        raise ValueError("URL must not contain control characters")
     parsed = urlsplit(url)
     if parsed.scheme not in {"http", "https"} or not parsed.hostname:
         raise ValueError("URL must be an absolute http:// or https:// address")

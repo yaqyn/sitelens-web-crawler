@@ -146,6 +146,11 @@ class TestAsyncCrawler(unittest.IsolatedAsyncioTestCase):
 
 
 class TestValidationAndReport(unittest.TestCase):
+    def test_seed_control_characters_are_rejected_before_normalization(self):
+        for char in ["\n", "\r", "\t", "\x00", "\x1f", "\x7f"]:
+            with self.subTest(char=repr(char)), self.assertRaisesRegex(ValueError, "control characters"):
+                AsyncCrawler("https://exa" + char + "mple.com")
+
     def test_invalid_options(self):
         for options in [{'max_pages': 0}, {'max_concurrency': 0}, {'timeout': 0},
                         {'delay': -1}, {'max_depth': -1}, {'retries': -1}, {'timeout': float('nan')}]:
