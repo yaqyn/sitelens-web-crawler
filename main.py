@@ -2,6 +2,8 @@
 import argparse
 import asyncio
 import math
+import os
+from pathlib import Path
 import sys
 from urllib.parse import urlsplit, urljoin, urldefrag
 from urllib.robotparser import RobotFileParser
@@ -39,7 +41,7 @@ def validate_url(url):
 class AsyncCrawler:
     def __init__(self, base_url, max_concurrency=5, max_pages=100, *,
                  timeout=30, retries=2, delay=0, max_depth=None,
-                 respect_robots=True, max_bytes=2_000_000, quiet=False):
+                 respect_robots=True, max_bytes=2_000_000, quiet=False, on_event=None):
         validate_url(base_url)
         if max_concurrency < 1 or max_pages < 1 or max_bytes < 1:
             raise ValueError("Concurrency, page limit, and byte limit must be positive")
@@ -53,6 +55,7 @@ class AsyncCrawler:
         self.timeout, self.retries, self.delay = timeout, retries, delay
         self.max_depth, self.max_bytes = max_depth, max_bytes
         self.respect_robots, self.quiet = respect_robots, quiet
+        self.on_event = on_event
         self.page_data, self.errors = {}, {}
         self.seen = set()
         self.queue = asyncio.Queue()
@@ -158,19 +161,26 @@ class AsyncCrawler:
         self.seen.add(normalized)
         self.queue.put_nowait((url, depth, normalized))
 
+    def emit(self, kind, url, detail=""):
+        if self.on_event:
+            self.on_event(kind, url, detail)
+
     async def worker(self):
         while True:
             url, depth, normalized = await self.queue.get()
             try:
                 if not self.quiet:
                     print(f"crawling: {url}")
+                self.emit("Fetching", url)
                 html, final_url = await self.get_html(url)
                 data = extract_page_data(html, final_url)
                 self.page_data[normalized] = data
+                self.emit("Collected", url, data["heading"])
                 for link in data["outgoing_links"]:
                     self.enqueue(link, depth + 1)
             except (aiohttp.ClientError, asyncio.TimeoutError, ValueError, LookupError) as error:
                 self.errors[url] = str(error) or type(error).__name__
+                self.emit("Failed", url, self.errors[url])
                 if not self.quiet:
                     print(f"failed: {url}: {self.errors[url]}", file=sys.stderr)
             finally:
@@ -180,6 +190,8 @@ class AsyncCrawler:
         if self.session is None:
             raise RuntimeError("Use 'async with AsyncCrawler(...)' before crawling")
         await self.load_robots()
+        for url, error in self.errors.items():
+            self.emit("Blocked", url, error)
         self.enqueue(self.base_url, 0)
         self.all_tasks = {asyncio.create_task(self.worker()) for _ in range(self.max_concurrency)}
         try:
@@ -206,7 +218,10 @@ def positive_int(value):
 
 async def main(argv=None):
     parser = argparse.ArgumentParser(description="Explore a website and export structured page data")
-    parser.add_argument("base_url")
+    parser.add_argument("base_url", nargs="?")
+    parser.add_argument("--interactive", action="store_true", help="Open the keyboard-driven workspace")
+    parser.add_argument("--plain", action="store_true", help="Use linear prompts without colors or cursor control")
+    parser.add_argument("--theme", choices=["atlas", "parchment", "contrast", "textual-ansi"], default="atlas")
     parser.add_argument("max_concurrency", nargs="?", type=positive_int, default=5)
     parser.add_argument("max_pages", nargs="?", type=positive_int, default=100)
     parser.add_argument("--output", default="report.json")
@@ -219,6 +234,23 @@ async def main(argv=None):
     parser.add_argument("--ignore-robots", action="store_true")
     parser.add_argument("--quiet", action="store_true")
     args = parser.parse_args(argv)
+    if args.plain and args.interactive:
+        parser.error("choose --plain or --interactive")
+    if not args.base_url and not args.interactive and os.environ.get("TERM") == "dumb":
+        args.plain = True
+    if args.plain and not args.base_url:
+        try:
+            args.base_url = input("Website URL (Ctrl+C to cancel): ").strip()
+        except EOFError:
+            parser.error("no URL received; pass an absolute http:// or https:// URL")
+    if args.interactive or (not args.base_url and not args.plain):
+        if not sys.stdin.isatty() or not sys.stdout.isatty():
+            parser.error("interactive mode needs a terminal; pass a URL for script mode or use --plain")
+        from terminal_ui import SiteLensApp
+        await SiteLensApp(args).run_async()
+        return 0
+    if args.errors and Path(args.output).resolve() == Path(args.errors).resolve():
+        parser.error("page and error reports need different paths")
     try:
         crawler = AsyncCrawler(args.base_url, args.max_concurrency, args.max_pages,
                                timeout=args.timeout, retries=args.retries, delay=args.delay,
