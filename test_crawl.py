@@ -10,6 +10,14 @@ from crawl import (
 
 
 class TestCrawl(unittest.TestCase):
+    def test_malformed_urls_do_not_discard_valid_page_data(self):
+        result = extract_page_data(
+            '<h1>Useful page</h1><a href="http://[">bad</a><a href="/valid">good</a>'
+            '<img src="https://["><img src="/image.png">', "https://example.com")
+        self.assertEqual(result["heading"], "Useful page")
+        self.assertEqual(result["outgoing_links"], ["https://example.com/valid"])
+        self.assertEqual(result["image_urls"], ["https://example.com/image.png"])
+
 
     def test_inline_elements_preserve_word_boundaries(self):
         html = "<h1>Hello <em>world</em> today</h1><p>Read <a href='/'>this guide</a> now.</p>"

@@ -49,7 +49,10 @@ def get_urls_from_html(html, base_url):
         href = a_tag.get("href")
 
         if href is not None:
-            urls.append(urljoin(base_url, href))
+            try:
+                urls.append(urljoin(base_url, href))
+            except ValueError:
+                continue
 
     return urls
 
@@ -63,7 +66,10 @@ def get_images_from_html(html, base_url):
         src = img_tag.get("src")
 
         if src is not None:
-            images.append(urljoin(base_url, src))
+            try:
+                images.append(urljoin(base_url, src))
+            except ValueError:
+                continue
 
     return images
 
