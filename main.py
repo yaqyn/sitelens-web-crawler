@@ -32,7 +32,7 @@ def validate_url(url):
     parsed = urlsplit(url)
     if parsed.scheme not in {"http", "https"} or not parsed.hostname:
         raise ValueError("URL must be an absolute http:// or https:// address")
-    if parsed.username or parsed.password:
+    if parsed.username is not None or parsed.password is not None:
         raise ValueError("URLs with embedded credentials are not supported")
     parsed.port  # Validate malformed ports before making a request.
     return url

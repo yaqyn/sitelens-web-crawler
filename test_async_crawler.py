@@ -146,6 +146,11 @@ class TestAsyncCrawler(unittest.IsolatedAsyncioTestCase):
 
 
 class TestValidationAndReport(unittest.TestCase):
+    def test_even_empty_embedded_credentials_are_rejected(self):
+        for url in ["https://@example.com", "https://:@example.com", "https://user:@example.com"]:
+            with self.subTest(url=url), self.assertRaisesRegex(ValueError, "credentials"):
+                AsyncCrawler(url)
+
     def test_seed_control_characters_are_rejected_before_normalization(self):
         for char in ["\n", "\r", "\t", "\x00", "\x1f", "\x7f"]:
             with self.subTest(char=repr(char)), self.assertRaisesRegex(ValueError, "control characters"):
