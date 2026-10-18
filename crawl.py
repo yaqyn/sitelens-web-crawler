@@ -44,13 +44,17 @@ def get_urls_from_html(html, base_url):
     soup = html if isinstance(html, BeautifulSoup) else BeautifulSoup(html, "html.parser")
 
     urls = []
+    seen = set()
 
     for a_tag in soup.find_all("a"):
         href = a_tag.get("href")
 
         if href is not None:
             try:
-                urls.append(urljoin(base_url, href))
+                url = urljoin(base_url, href)
+                if url not in seen:
+                    seen.add(url)
+                    urls.append(url)
             except ValueError:
                 continue
 
@@ -61,13 +65,17 @@ def get_images_from_html(html, base_url):
     soup = html if isinstance(html, BeautifulSoup) else BeautifulSoup(html, "html.parser")
 
     images = []
+    seen = set()
 
     for img_tag in soup.find_all("img"):
         src = img_tag.get("src")
 
         if src is not None:
             try:
-                images.append(urljoin(base_url, src))
+                url = urljoin(base_url, src)
+                if url not in seen:
+                    seen.add(url)
+                    images.append(url)
             except ValueError:
                 continue
 

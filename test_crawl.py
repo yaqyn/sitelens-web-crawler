@@ -126,6 +126,11 @@ class TestCrawl(unittest.TestCase):
         ]
         self.assertEqual(actual, expected)
 
+    def test_duplicate_resources_are_reported_once(self):
+        html = '<a href="/same">one</a><a href="/same">two</a><img src="/same.png"><img src="/same.png">'
+        self.assertEqual(get_urls_from_html(html, "https://example.com"), ["https://example.com/same"])
+        self.assertEqual(get_images_from_html(html, "https://example.com"), ["https://example.com/same.png"])
+
     # get_images_from_html tests
 
     def test_get_images_from_html_relative(self):
