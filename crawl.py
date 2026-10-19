@@ -1,4 +1,4 @@
-from urllib.parse import urlsplit, urljoin
+from urllib.parse import urldefrag, urlsplit, urljoin
 from typing import TypedDict
 from bs4 import BeautifulSoup, Tag
 
@@ -51,7 +51,7 @@ def get_urls_from_html(html, base_url):
 
         if href is not None:
             try:
-                url = urljoin(base_url, href)
+                url = urldefrag(urljoin(base_url, href))[0]
                 if url not in seen:
                     seen.add(url)
                     urls.append(url)

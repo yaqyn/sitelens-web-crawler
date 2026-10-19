@@ -131,6 +131,10 @@ class TestCrawl(unittest.TestCase):
         self.assertEqual(get_urls_from_html(html, "https://example.com"), ["https://example.com/same"])
         self.assertEqual(get_images_from_html(html, "https://example.com"), ["https://example.com/same.png"])
 
+    def test_link_fragments_do_not_create_duplicate_pages(self):
+        html = '<a href="/guide#start">start</a><a href="/guide#details">details</a>'
+        self.assertEqual(get_urls_from_html(html, "https://example.com"), ["https://example.com/guide"])
+
     # get_images_from_html tests
 
     def test_get_images_from_html_relative(self):
