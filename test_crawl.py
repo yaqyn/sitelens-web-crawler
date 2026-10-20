@@ -135,6 +135,10 @@ class TestCrawl(unittest.TestCase):
         html = '<a href="/guide#start">start</a><a href="/guide#details">details</a>'
         self.assertEqual(get_urls_from_html(html, "https://example.com"), ["https://example.com/guide"])
 
+    def test_non_web_links_are_not_reported_as_crawl_targets(self):
+        html = '<a href="mailto:hi@example.com">mail</a><a href="javascript:void(0)">script</a><a href="/guide">guide</a>'
+        self.assertEqual(get_urls_from_html(html, "https://example.com"), ["https://example.com/guide"])
+
     # get_images_from_html tests
 
     def test_get_images_from_html_relative(self):

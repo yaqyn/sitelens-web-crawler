@@ -52,6 +52,8 @@ def get_urls_from_html(html, base_url):
         if href is not None:
             try:
                 url = urldefrag(urljoin(base_url, href))[0]
+                if urlsplit(url).scheme not in {"http", "https"}:
+                    continue
                 if url not in seen:
                     seen.add(url)
                     urls.append(url)
