@@ -13,7 +13,8 @@ class PageData(TypedDict):
 
 def normalize_url(url):
     parsed = urlsplit(url)
-    return parsed.netloc.lower() + parsed.path.rstrip("/")
+    query = f"?{parsed.query}" if parsed.query else ""
+    return parsed.netloc.lower() + parsed.path.rstrip("/") + query
 
 
 def get_heading_from_html(html: str | BeautifulSoup) -> str:

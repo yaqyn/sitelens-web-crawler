@@ -50,6 +50,12 @@ class TestCrawl(unittest.TestCase):
         expected = "www.boot.dev/blog/path"
         self.assertEqual(actual, expected)
 
+    def test_normalize_url_preserves_distinct_query_pages(self):
+        self.assertNotEqual(
+            normalize_url("https://example.com/search?page=1"),
+            normalize_url("https://example.com/search?page=2"),
+        )
+
     # get_heading_from_html tests
 
     def test_get_heading_from_html_h1(self):
