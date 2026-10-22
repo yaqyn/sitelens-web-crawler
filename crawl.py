@@ -75,7 +75,9 @@ def get_images_from_html(html, base_url):
 
         if src is not None:
             try:
-                url = urljoin(base_url, src)
+                url = urldefrag(urljoin(base_url, src))[0]
+                if urlsplit(url).scheme not in {"http", "https"}:
+                    continue
                 if url not in seen:
                     seen.add(url)
                     images.append(url)
