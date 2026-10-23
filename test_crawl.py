@@ -161,6 +161,17 @@ class TestCrawl(unittest.TestCase):
         expected = ["https://example.com/image.png"]
         self.assertEqual(actual, expected)
 
+    def test_get_images_from_html_includes_responsive_sources(self):
+        html = '<img src="/fallback.png" srcset="/small.png 1x, /large.png 2x">'
+        self.assertEqual(
+            get_images_from_html(html, "https://crawler-test.com"),
+            [
+                "https://crawler-test.com/fallback.png",
+                "https://crawler-test.com/small.png",
+                "https://crawler-test.com/large.png",
+            ],
+        )
+
     def test_non_web_images_are_ignored_and_fragments_are_deduplicated(self):
         html = (
             '<img src="data:image/png;base64,abc">'

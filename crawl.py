@@ -71,9 +71,16 @@ def get_images_from_html(html, base_url):
     seen = set()
 
     for img_tag in soup.find_all("img"):
-        src = img_tag.get("src")
-
-        if src is not None:
+        candidates = []
+        if img_tag.get("src") is not None:
+            candidates.append(img_tag.get("src"))
+        if img_tag.get("srcset"):
+            candidates.extend(
+                item.strip().split()[0]
+                for item in img_tag.get("srcset").split(",")
+                if item.strip()
+            )
+        for src in candidates:
             try:
                 url = urldefrag(urljoin(base_url, src))[0]
                 if urlsplit(url).scheme not in {"http", "https"}:
