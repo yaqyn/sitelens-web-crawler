@@ -172,6 +172,19 @@ class TestCrawl(unittest.TestCase):
             ],
         )
 
+    def test_srcset_commas_inside_urls_do_not_create_fake_candidates(self):
+        html = (
+            '<img srcset="data:image/png;base64,AAAA 1x, '
+            '/large.png 2x, /map,detail.png 3x">'
+        )
+        self.assertEqual(
+            get_images_from_html(html, "https://crawler-test.com"),
+            [
+                "https://crawler-test.com/large.png",
+                "https://crawler-test.com/map,detail.png",
+            ],
+        )
+
     def test_non_web_images_are_ignored_and_fragments_are_deduplicated(self):
         html = (
             '<img src="data:image/png;base64,abc">'

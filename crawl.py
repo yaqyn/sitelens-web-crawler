@@ -64,6 +64,44 @@ def get_urls_from_html(html, base_url):
     return urls
 
 
+def _srcset_urls(value):
+    """Return candidate URLs using the HTML srcset token boundaries."""
+    urls = []
+    position = 0
+    whitespace = " \t\n\f\r"
+
+    while position < len(value):
+        while position < len(value) and (value[position] in whitespace or value[position] == ","):
+            position += 1
+        if position >= len(value):
+            break
+
+        start = position
+        while position < len(value) and value[position] not in whitespace:
+            position += 1
+        url = value[start:position]
+
+        if url.endswith(","):
+            url = url.rstrip(",")
+        else:
+            parentheses = 0
+            while position < len(value):
+                character = value[position]
+                if character == "(":
+                    parentheses += 1
+                elif character == ")" and parentheses:
+                    parentheses -= 1
+                elif character == "," and not parentheses:
+                    position += 1
+                    break
+                position += 1
+
+        if url:
+            urls.append(url)
+
+    return urls
+
+
 def get_images_from_html(html, base_url):
     soup = html if isinstance(html, BeautifulSoup) else BeautifulSoup(html, "html.parser")
 
@@ -75,11 +113,7 @@ def get_images_from_html(html, base_url):
         if img_tag.get("src") is not None:
             candidates.append(img_tag.get("src"))
         if img_tag.get("srcset"):
-            candidates.extend(
-                item.strip().split()[0]
-                for item in img_tag.get("srcset").split(",")
-                if item.strip()
-            )
+            candidates.extend(_srcset_urls(img_tag.get("srcset")))
         for src in candidates:
             try:
                 url = urldefrag(urljoin(base_url, src))[0]
