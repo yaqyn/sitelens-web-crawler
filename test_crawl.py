@@ -172,6 +172,17 @@ class TestCrawl(unittest.TestCase):
             ],
         )
 
+    def test_get_images_from_html_includes_lazy_loaded_sources(self):
+        html = '<img data-src="/lazy.png" data-srcset="/lazy-small.png 1x, /lazy-large.png 2x">'
+        self.assertEqual(
+            get_images_from_html(html, "https://crawler-test.com"),
+            [
+                "https://crawler-test.com/lazy.png",
+                "https://crawler-test.com/lazy-small.png",
+                "https://crawler-test.com/lazy-large.png",
+            ],
+        )
+
     def test_srcset_commas_inside_urls_do_not_create_fake_candidates(self):
         html = (
             '<img srcset="data:image/png;base64,AAAA 1x, '
