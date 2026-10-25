@@ -179,6 +179,16 @@ class TestCrawl(unittest.TestCase):
             ["https://crawler-test.com/wide.webp", "https://crawler-test.com/fallback.png"],
         )
 
+    def test_get_images_from_html_excludes_media_sources(self):
+        html = (
+            '<audio><source src="/sound.mp3"></audio>'
+            '<video><source src="/movie.webm"><img src="/poster.png"></video>'
+        )
+        self.assertEqual(
+            get_images_from_html(html, "https://crawler-test.com"),
+            ["https://crawler-test.com/poster.png"],
+        )
+
     def test_get_images_from_html_includes_lazy_loaded_sources(self):
         html = '<img data-src="/lazy.png" data-srcset="/lazy-small.png 1x, /lazy-large.png 2x">'
         self.assertEqual(
