@@ -172,6 +172,13 @@ class TestCrawl(unittest.TestCase):
             ],
         )
 
+    def test_get_images_from_html_includes_picture_sources(self):
+        html = '<picture><source srcset="/wide.webp 2x"><img src="/fallback.png"></picture>'
+        self.assertEqual(
+            get_images_from_html(html, "https://crawler-test.com"),
+            ["https://crawler-test.com/wide.webp", "https://crawler-test.com/fallback.png"],
+        )
+
     def test_get_images_from_html_includes_lazy_loaded_sources(self):
         html = '<img data-src="/lazy.png" data-srcset="/lazy-small.png 1x, /lazy-large.png 2x">'
         self.assertEqual(

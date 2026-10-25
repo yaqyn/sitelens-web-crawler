@@ -108,7 +108,7 @@ def get_images_from_html(html, base_url):
     images = []
     seen = set()
 
-    for img_tag in soup.find_all("img"):
+    for img_tag in soup.find_all(["img", "source"]):
         candidates = []
         for attribute in ("src", "data-src"):
             if img_tag.get(attribute) is not None:

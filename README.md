@@ -109,7 +109,7 @@ A bounded frontier feeds asynchronous workers; extracted page records become a U
 | `heading` | First `h1`, falling back to `h2` |
 | `first_paragraph` | First paragraph in `main`, or in the page if `main` is absent |
 | `outgoing_links` | Links resolved against the page URL |
-| `image_urls` | `src`, responsive `srcset`, and common lazy-loading `data-src`/`data-srcset` image sources resolved against the page URL |
+| `image_urls` | `img` and `picture source` URLs from `src`, responsive `srcset`, and common lazy-loading `data-src`/`data-srcset`, resolved against the page URL |
 
 ![Report produced by the project extractor on a small local HTML fixture](readme-assets/report.png)
 
