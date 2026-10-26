@@ -114,12 +114,13 @@ def get_images_from_html(html, base_url):
         candidates = []
         if img_tag.name == "video":
             candidates.append(img_tag.get("poster"))
-        for attribute in ("src", "data-src"):
-            if img_tag.get(attribute) is not None:
-                candidates.append(img_tag.get(attribute))
-        for attribute in ("srcset", "data-srcset"):
-            if img_tag.get(attribute):
-                candidates.extend(_srcset_urls(img_tag.get(attribute)))
+        else:
+            for attribute in ("src", "data-src"):
+                if img_tag.get(attribute) is not None:
+                    candidates.append(img_tag.get(attribute))
+            for attribute in ("srcset", "data-srcset"):
+                if img_tag.get(attribute):
+                    candidates.extend(_srcset_urls(img_tag.get(attribute)))
         for src in candidates:
             try:
                 url = urldefrag(urljoin(base_url, src))[0]
