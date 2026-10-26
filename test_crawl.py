@@ -189,6 +189,13 @@ class TestCrawl(unittest.TestCase):
             ["https://crawler-test.com/poster.png"],
         )
 
+    def test_get_images_from_html_includes_video_posters(self):
+        html = '<video poster="/preview.jpg"><source src="/movie.webm"></video>'
+        self.assertEqual(
+            get_images_from_html(html, "https://crawler-test.com"),
+            ["https://crawler-test.com/preview.jpg"],
+        )
+
     def test_get_images_from_html_includes_lazy_loaded_sources(self):
         html = '<img data-src="/lazy.png" data-srcset="/lazy-small.png 1x, /lazy-large.png 2x">'
         self.assertEqual(
