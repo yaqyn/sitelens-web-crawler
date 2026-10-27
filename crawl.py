@@ -51,13 +51,22 @@ def get_urls_from_html(html, base_url):
 
     urls = []
     seen = set()
+    resolution_base = base_url
+    base_tag = soup.find("base", href=True)
+    if isinstance(base_tag, Tag):
+        try:
+            candidate = urljoin(base_url, base_tag.get("href"))
+            if urlsplit(candidate).scheme in {"http", "https"}:
+                resolution_base = candidate
+        except (TypeError, ValueError):
+            pass
 
     for a_tag in soup.find_all("a"):
         href = a_tag.get("href")
 
         if href is not None:
             try:
-                url = urldefrag(urljoin(base_url, href))[0]
+                url = urldefrag(urljoin(resolution_base, href))[0]
                 if urlsplit(url).scheme not in {"http", "https"}:
                     continue
                 if url not in seen:

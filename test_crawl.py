@@ -124,6 +124,18 @@ class TestCrawl(unittest.TestCase):
         expected = ["https://crawler-test.com/about"]
         self.assertEqual(actual, expected)
 
+    def test_get_urls_from_html_honors_document_base(self):
+        html = '<base href="/docs/"><a href="guide">Guide</a>'
+        self.assertEqual(
+            get_urls_from_html(html, "https://crawler-test.com/products/page"),
+            ["https://crawler-test.com/docs/guide"],
+        )
+        non_web_base = '<base href="data:text/plain,ignored"><a href="/safe">Safe</a>'
+        self.assertEqual(
+            get_urls_from_html(non_web_base, "https://crawler-test.com/page"),
+            ["https://crawler-test.com/safe"],
+        )
+
     def test_get_urls_from_html_all_links(self):
         input_url = "https://crawler-test.com"
         input_body = """<html><body>
