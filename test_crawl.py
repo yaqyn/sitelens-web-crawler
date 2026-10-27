@@ -56,6 +56,13 @@ class TestCrawl(unittest.TestCase):
             normalize_url("https://example.com/search?page=2"),
         )
 
+    def test_normalize_url_collapses_explicit_default_ports(self):
+        self.assertEqual(
+            normalize_url("https://Example.com:443/guide"),
+            normalize_url("https://example.com/guide"),
+        )
+        self.assertEqual(normalize_url("https://example.com:8443/guide"), "example.com:8443/guide")
+
     # get_heading_from_html tests
 
     def test_get_heading_from_html_h1(self):
