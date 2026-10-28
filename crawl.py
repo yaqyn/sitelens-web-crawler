@@ -44,6 +44,16 @@ def get_first_paragraph_from_html(html: str | BeautifulSoup) -> str:
 def get_urls_from_html(html, base_url):
     soup = html if isinstance(html, BeautifulSoup) else BeautifulSoup(html, "html.parser")
 
+    document_base = base_url
+    base_tag = soup.find("base", href=True)
+    if isinstance(base_tag, Tag):
+        try:
+            candidate = urljoin(base_url, base_tag.get("href"))
+            if urlsplit(candidate).scheme in {"http", "https"}:
+                document_base = candidate
+        except (TypeError, ValueError):
+            pass
+
     urls = []
     seen = set()
 
@@ -52,7 +62,7 @@ def get_urls_from_html(html, base_url):
 
         if href is not None:
             try:
-                url = urldefrag(urljoin(base_url, href))[0]
+                url = urldefrag(urljoin(document_base, href))[0]
                 if urlsplit(url).scheme not in {"http", "https"}:
                     continue
                 if url not in seen:
