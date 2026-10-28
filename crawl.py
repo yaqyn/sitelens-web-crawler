@@ -58,6 +58,9 @@ def get_urls_from_html(html, base_url):
     seen = set()
 
     for a_tag in soup.find_all("a"):
+        relations = {str(value).lower() for value in (a_tag.get("rel") or [])}
+        if "nofollow" in relations:
+            continue
         href = a_tag.get("href")
 
         if href is not None:
