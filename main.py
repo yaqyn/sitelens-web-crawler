@@ -50,7 +50,8 @@ class AsyncCrawler:
         if max_depth is not None and max_depth < 0:
             raise ValueError("Depth must be nonnegative")
         self.base_url = urldefrag(base_url)[0]
-        self.base_domain = urlsplit(base_url).netloc.lower()
+        base = urlsplit(base_url)
+        self.base_domain = (base.scheme.lower(), base.hostname.lower(), base.port or (443 if base.scheme.lower() == "https" else 80))
         self.max_concurrency, self.max_pages = max_concurrency, max_pages
         self.timeout, self.retries, self.delay = timeout, retries, delay
         self.max_depth, self.max_bytes = max_depth, max_bytes
@@ -80,9 +81,13 @@ class AsyncCrawler:
 
     def in_scope(self, url):
         parsed = urlsplit(url)
-        return (parsed.scheme in {"http", "https"} and
-                parsed.netloc.lower() == self.base_domain and
-                parsed.username is None and parsed.password is None)
+        if parsed.scheme not in {"http", "https"} or parsed.username is not None or parsed.password is not None:
+            return False
+        try:
+            port = parsed.port or (443 if parsed.scheme == "https" else 80)
+        except ValueError:
+            return False
+        return (parsed.scheme.lower(), (parsed.hostname or "").lower(), port) == self.base_domain
 
     async def pace(self):
         async with self.rate_lock:
