@@ -77,6 +77,24 @@ class TestAsyncCrawler(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(crawler.seen), 5)
         self.assertLessEqual(self.peak, 2)
 
+    async def test_default_port_spellings_stay_in_scope(self):
+        cases = [
+            ("https://example.com", "https://example.com:443/about"),
+            ("https://example.com:443", "https://example.com/about"),
+            ("http://example.com", "http://example.com:80/about"),
+            ("http://example.com:80", "http://example.com/about"),
+        ]
+        for base, candidate in cases:
+            with self.subTest(base=base, candidate=candidate):
+                crawler = AsyncCrawler(base)
+                self.assertTrue(crawler.in_scope(candidate))
+
+    async def test_scheme_and_nondefault_port_remain_out_of_scope(self):
+        crawler = AsyncCrawler("https://example.com")
+        self.assertFalse(crawler.in_scope("http://example.com/about"))
+        self.assertFalse(crawler.in_scope("https://example.com:8443/about"))
+        self.assertFalse(crawler.in_scope("https://user@example.com/about"))
+
     async def test_depth_limit(self):
         crawler = await self.crawl(max_depth=0)
         self.assertEqual(len(crawler.page_data), 1)
