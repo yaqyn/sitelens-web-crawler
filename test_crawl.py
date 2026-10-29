@@ -131,6 +131,20 @@ class TestCrawl(unittest.TestCase):
             ["https://example.com/docs/guide"],
         )
 
+    def test_images_honor_document_base_url(self):
+        html = (
+            '<base href="https://cdn.example/assets/">'
+            '<img src="logo.png" srcset="small.png 1x, large.png 2x">'
+        )
+        self.assertEqual(
+            get_images_from_html(html, "https://example.com/docs/page"),
+            [
+                "https://cdn.example/assets/logo.png",
+                "https://cdn.example/assets/small.png",
+                "https://cdn.example/assets/large.png",
+            ],
+        )
+
     def test_get_urls_from_html_all_links(self):
         input_url = "https://crawler-test.com"
         input_body = """<html><body>

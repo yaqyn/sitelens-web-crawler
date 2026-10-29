@@ -46,18 +46,22 @@ def get_first_paragraph_from_html(html: str | BeautifulSoup) -> str:
     return " ".join(p_tag.stripped_strings) if isinstance(p_tag, Tag) else ""
 
 
-def get_urls_from_html(html, base_url):
-    soup = html if isinstance(html, BeautifulSoup) else BeautifulSoup(html, "html.parser")
-
-    document_base = base_url
+def _document_base_url(soup: BeautifulSoup, base_url: str) -> str:
     base_tag = soup.find("base", href=True)
     if isinstance(base_tag, Tag):
         try:
             candidate = urljoin(base_url, base_tag.get("href"))
             if urlsplit(candidate).scheme in {"http", "https"}:
-                document_base = candidate
+                return candidate
         except (TypeError, ValueError):
             pass
+    return base_url
+
+
+def get_urls_from_html(html, base_url):
+    soup = html if isinstance(html, BeautifulSoup) else BeautifulSoup(html, "html.parser")
+
+    document_base = _document_base_url(soup, base_url)
 
     urls = []
     seen = set()
@@ -124,6 +128,7 @@ def _srcset_urls(value):
 
 def get_images_from_html(html, base_url):
     soup = html if isinstance(html, BeautifulSoup) else BeautifulSoup(html, "html.parser")
+    document_base = _document_base_url(soup, base_url)
 
     images = []
     seen = set()
@@ -143,7 +148,7 @@ def get_images_from_html(html, base_url):
                     candidates.extend(_srcset_urls(img_tag.get(attribute)))
         for src in candidates:
             try:
-                url = urldefrag(urljoin(base_url, src))[0]
+                url = urldefrag(urljoin(document_base, src))[0]
                 if urlsplit(url).scheme not in {"http", "https"}:
                     continue
                 if url not in seen:
