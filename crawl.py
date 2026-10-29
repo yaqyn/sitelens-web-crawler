@@ -13,8 +13,13 @@ class PageData(TypedDict):
 
 def normalize_url(url):
     parsed = urlsplit(url)
+    hostname = (parsed.hostname or "").lower()
+    if ":" in hostname:
+        hostname = f"[{hostname}]"
+    default_port = (parsed.scheme.lower(), parsed.port) in {("http", 80), ("https", 443)}
+    authority = hostname if parsed.port is None or default_port else f"{hostname}:{parsed.port}"
     query = f"?{parsed.query}" if parsed.query else ""
-    return parsed.netloc.lower() + parsed.path.rstrip("/") + query
+    return authority + parsed.path.rstrip("/") + query
 
 
 def get_heading_from_html(html: str | BeautifulSoup) -> str:
