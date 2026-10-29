@@ -169,6 +169,17 @@ class TestCrawl(unittest.TestCase):
             ["https://example.com/follow"],
         )
 
+    def test_download_links_are_not_crawl_targets(self):
+        html = (
+            '<a href="/guide">Guide</a>'
+            '<a href="/report.pdf" download>Download</a>'
+            '<a href="/export.csv" download="data.csv">Export</a>'
+        )
+        self.assertEqual(
+            get_urls_from_html(html, "https://example.com"),
+            ["https://example.com/guide"],
+        )
+
     # get_images_from_html tests
 
     def test_get_images_from_html_relative(self):

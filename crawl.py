@@ -63,6 +63,8 @@ def get_urls_from_html(html, base_url):
     seen = set()
 
     for a_tag in soup.find_all("a"):
+        if a_tag.has_attr("download"):
+            continue
         relations = {str(value).lower() for value in (a_tag.get("rel") or [])}
         if "nofollow" in relations:
             continue
