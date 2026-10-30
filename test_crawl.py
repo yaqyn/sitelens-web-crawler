@@ -298,7 +298,7 @@ class TestCrawl(unittest.TestCase):
 
     def test_extract_page_data_basic(self):
         input_url = "https://crawler-test.com"
-        input_body = """<html><body>
+        input_body = """<html><head><title> Site &amp; Docs </title></head><body>
             <h1>Test Title</h1>
             <p>This is the first paragraph.</p>
             <a href="/link1">Link 1</a>
@@ -307,6 +307,7 @@ class TestCrawl(unittest.TestCase):
         actual = extract_page_data(input_body, input_url)
         expected = {
             "url": "https://crawler-test.com",
+            "title": "Site & Docs",
             "heading": "Test Title",
             "first_paragraph": "This is the first paragraph.",
             "outgoing_links": ["https://crawler-test.com/link1"],
