@@ -298,7 +298,11 @@ class TestCrawl(unittest.TestCase):
 
     def test_extract_page_data_basic(self):
         input_url = "https://crawler-test.com"
-        input_body = """<html><head><title> Site &amp; Docs </title></head><body>
+        input_body = """<html><head><title> Site &amp; Docs </title>
+            <meta property="og:description" content="Social preview">
+            <meta name="viewport" content="width=device-width">
+            <meta name="Description" content=" Crawl-ready   summary ">
+            </head><body>
             <h1>Test Title</h1>
             <p>This is the first paragraph.</p>
             <a href="/link1">Link 1</a>
@@ -308,12 +312,16 @@ class TestCrawl(unittest.TestCase):
         expected = {
             "url": "https://crawler-test.com",
             "title": "Site & Docs",
+            "description": "Crawl-ready summary",
             "heading": "Test Title",
             "first_paragraph": "This is the first paragraph.",
             "outgoing_links": ["https://crawler-test.com/link1"],
             "image_urls": ["https://crawler-test.com/image1.jpg"],
         }
         self.assertEqual(actual, expected)
+
+    def test_description_requires_meta_name_and_content(self):
+        self.assertEqual(extract_page_data('<div name="description" content="wrong"></div><meta property="description" content="wrong">', "https://example.com")["description"], "")
 
 
 if __name__ == "__main__":

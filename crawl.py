@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup, Tag
 class PageData(TypedDict):
     url: str
     title: str
+    description: str
     heading: str
     first_paragraph: str
     outgoing_links: list[str]
@@ -38,6 +39,14 @@ def get_title_from_html(html: str | BeautifulSoup) -> str:
     soup = html if isinstance(html, BeautifulSoup) else BeautifulSoup(html, "html.parser")
     title = soup.find("title")
     return " ".join(title.stripped_strings) if isinstance(title, Tag) else ""
+
+
+def get_description_from_html(html: str | BeautifulSoup) -> str:
+    soup = html if isinstance(html, BeautifulSoup) else BeautifulSoup(html, "html.parser")
+    meta = soup.find("meta", attrs={"name": lambda value: isinstance(value, str) and value.casefold() == "description"})
+    if not isinstance(meta, Tag) or not isinstance(meta.get("content"), str):
+        return ""
+    return " ".join(meta["content"].split())
 
 
 def get_first_paragraph_from_html(html: str | BeautifulSoup) -> str:
@@ -172,6 +181,7 @@ def extract_page_data(html: str, page_url: str) -> PageData:
     return {
         "url": page_url,
         "title": get_title_from_html(soup),
+        "description": get_description_from_html(soup),
         "heading": get_heading_from_html(soup),
         "first_paragraph": get_first_paragraph_from_html(soup),
         "outgoing_links": get_urls_from_html(soup, page_url),
