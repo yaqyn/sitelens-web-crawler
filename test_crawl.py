@@ -313,6 +313,7 @@ class TestCrawl(unittest.TestCase):
             "url": "https://crawler-test.com",
             "title": "Site & Docs",
             "description": "Crawl-ready summary",
+            "canonical_url": "",
             "heading": "Test Title",
             "first_paragraph": "This is the first paragraph.",
             "outgoing_links": ["https://crawler-test.com/link1"],
@@ -322,6 +323,11 @@ class TestCrawl(unittest.TestCase):
 
     def test_description_requires_meta_name_and_content(self):
         self.assertEqual(extract_page_data('<div name="description" content="wrong"></div><meta property="description" content="wrong">', "https://example.com")["description"], "")
+
+    def test_canonical_url_requires_a_link_element_and_web_scheme(self):
+        page = extract_page_data('<link rel="canonical alternate" href="/guide"><meta rel="canonical" href="/wrong">', "https://example.com/start")
+        self.assertEqual(page["canonical_url"], "https://example.com/guide")
+        self.assertEqual(extract_page_data('<link rel="canonical" href="javascript:alert(1)">', "https://example.com")["canonical_url"], "")
 
 
 if __name__ == "__main__":
