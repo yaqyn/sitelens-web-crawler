@@ -314,6 +314,7 @@ class TestCrawl(unittest.TestCase):
             "title": "Site & Docs",
             "description": "Crawl-ready summary",
             "canonical_url": "",
+            "language": "",
             "heading": "Test Title",
             "first_paragraph": "This is the first paragraph.",
             "outgoing_links": ["https://crawler-test.com/link1"],
@@ -328,6 +329,11 @@ class TestCrawl(unittest.TestCase):
         page = extract_page_data('<link rel="canonical alternate" href="/guide"><meta rel="canonical" href="/wrong">', "https://example.com/start")
         self.assertEqual(page["canonical_url"], "https://example.com/guide")
         self.assertEqual(extract_page_data('<link rel="canonical" href="javascript:alert(1)">', "https://example.com")["canonical_url"], "")
+
+    def test_language_requires_the_html_lang_attribute(self):
+        page = extract_page_data('<html lang=" AR-eg "><body><div lang="fr">Text</div></body></html>', "https://example.com")
+        self.assertEqual(page["language"], "ar-eg")
+        self.assertEqual(extract_page_data('<div lang="fr">Text</div>', "https://example.com")["language"], "")
 
 
 if __name__ == "__main__":
