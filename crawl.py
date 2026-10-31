@@ -7,6 +7,8 @@ class PageData(TypedDict):
     url: str
     title: str
     description: str
+    canonical_url: str
+    language: str
     heading: str
     first_paragraph: str
     outgoing_links: list[str]
@@ -47,6 +49,26 @@ def get_description_from_html(html: str | BeautifulSoup) -> str:
     if not isinstance(meta, Tag) or not isinstance(meta.get("content"), str):
         return ""
     return " ".join(meta["content"].split())
+
+
+def get_canonical_url_from_html(html: str | BeautifulSoup, page_url: str) -> str:
+    soup = html if isinstance(html, BeautifulSoup) else BeautifulSoup(html, "html.parser")
+    link = soup.find("link", rel=lambda value: isinstance(value, (str, list)) and "canonical" in ([value.casefold()] if isinstance(value, str) else [str(item).casefold() for item in value]))
+    if not isinstance(link, Tag) or not isinstance(link.get("href"), str):
+        return ""
+    try:
+        candidate = urldefrag(urljoin(page_url, link["href"]))[0]
+        return candidate if urlsplit(candidate).scheme in {"http", "https"} else ""
+    except ValueError:
+        return ""
+
+
+def get_language_from_html(html: str | BeautifulSoup) -> str:
+    soup = html if isinstance(html, BeautifulSoup) else BeautifulSoup(html, "html.parser")
+    root = soup.find("html")
+    if not isinstance(root, Tag) or not isinstance(root.get("lang"), str):
+        return ""
+    return root["lang"].strip().lower()[:35]
 
 
 def get_first_paragraph_from_html(html: str | BeautifulSoup) -> str:
@@ -182,6 +204,8 @@ def extract_page_data(html: str, page_url: str) -> PageData:
         "url": page_url,
         "title": get_title_from_html(soup),
         "description": get_description_from_html(soup),
+        "canonical_url": get_canonical_url_from_html(soup, page_url),
+        "language": get_language_from_html(soup),
         "heading": get_heading_from_html(soup),
         "first_paragraph": get_first_paragraph_from_html(soup),
         "outgoing_links": get_urls_from_html(soup, page_url),
