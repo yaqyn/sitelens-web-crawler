@@ -315,6 +315,7 @@ class TestCrawl(unittest.TestCase):
             "description": "Crawl-ready summary",
             "canonical_url": "",
             "language": "",
+            "robots": [],
             "heading": "Test Title",
             "first_paragraph": "This is the first paragraph.",
             "outgoing_links": ["https://crawler-test.com/link1"],
@@ -334,6 +335,10 @@ class TestCrawl(unittest.TestCase):
         page = extract_page_data('<html lang=" AR-eg "><body><div lang="fr">Text</div></body></html>', "https://example.com")
         self.assertEqual(page["language"], "ar-eg")
         self.assertEqual(extract_page_data('<div lang="fr">Text</div>', "https://example.com")["language"], "")
+
+    def test_robots_directives_require_named_meta_elements(self):
+        page = extract_page_data('<meta name="ROBOTS" content=" noindex, Follow, noindex "><div name="robots" content="nofollow"></div>', "https://example.com")
+        self.assertEqual(page["robots"], ["noindex", "follow"])
 
 
 if __name__ == "__main__":

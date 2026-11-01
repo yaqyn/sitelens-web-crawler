@@ -9,6 +9,7 @@ class PageData(TypedDict):
     description: str
     canonical_url: str
     language: str
+    robots: list[str]
     heading: str
     first_paragraph: str
     outgoing_links: list[str]
@@ -69,6 +70,23 @@ def get_language_from_html(html: str | BeautifulSoup) -> str:
     if not isinstance(root, Tag) or not isinstance(root.get("lang"), str):
         return ""
     return root["lang"].strip().lower()[:35]
+
+
+def get_robots_from_html(html: str | BeautifulSoup) -> list[str]:
+    """Return normalized directives from the document's robots meta tags."""
+    soup = html if isinstance(html, BeautifulSoup) else BeautifulSoup(html, "html.parser")
+    directives = []
+    seen = set()
+    for meta in soup.find_all("meta", attrs={"name": lambda value: isinstance(value, str) and value.casefold() == "robots"}):
+        content = meta.get("content")
+        if not isinstance(content, str):
+            continue
+        for value in content.split(","):
+            directive = value.strip().lower()
+            if directive and directive not in seen:
+                seen.add(directive)
+                directives.append(directive)
+    return directives
 
 
 def get_first_paragraph_from_html(html: str | BeautifulSoup) -> str:
@@ -206,6 +224,7 @@ def extract_page_data(html: str, page_url: str) -> PageData:
         "description": get_description_from_html(soup),
         "canonical_url": get_canonical_url_from_html(soup, page_url),
         "language": get_language_from_html(soup),
+        "robots": get_robots_from_html(soup),
         "heading": get_heading_from_html(soup),
         "first_paragraph": get_first_paragraph_from_html(soup),
         "outgoing_links": get_urls_from_html(soup, page_url),
