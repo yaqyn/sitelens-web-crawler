@@ -10,6 +10,7 @@ class PageData(TypedDict):
     canonical_url: str
     language: str
     robots: list[str]
+    alternate_languages: list[dict[str, str]]
     heading: str
     first_paragraph: str
     outgoing_links: list[str]
@@ -112,6 +113,30 @@ def _document_base_url(soup: BeautifulSoup, base_url: str) -> str:
         except (TypeError, ValueError):
             pass
     return base_url
+
+
+def get_alternate_languages_from_html(html: str | BeautifulSoup, page_url: str) -> list[dict[str, str]]:
+    """Return web alternates declared by link[rel=alternate][hreflang]."""
+    soup = html if isinstance(html, BeautifulSoup) else BeautifulSoup(html, "html.parser")
+    document_base = _document_base_url(soup, page_url)
+    alternates = []
+    seen = set()
+    for link in soup.find_all("link"):
+        relations = {str(value).casefold() for value in (link.get("rel") or [])}
+        language = link.get("hreflang")
+        href = link.get("href")
+        if "alternate" not in relations or not isinstance(language, str) or not isinstance(href, str):
+            continue
+        try:
+            url = urldefrag(urljoin(document_base, href))[0]
+        except ValueError:
+            continue
+        language = language.strip().lower()
+        key = (language, url)
+        if language and urlsplit(url).scheme in {"http", "https"} and key not in seen:
+            seen.add(key)
+            alternates.append({"language": language[:35], "url": url})
+    return alternates
 
 
 def get_urls_from_html(html, base_url):
@@ -225,6 +250,7 @@ def extract_page_data(html: str, page_url: str) -> PageData:
         "canonical_url": get_canonical_url_from_html(soup, page_url),
         "language": get_language_from_html(soup),
         "robots": get_robots_from_html(soup),
+        "alternate_languages": get_alternate_languages_from_html(soup, page_url),
         "heading": get_heading_from_html(soup),
         "first_paragraph": get_first_paragraph_from_html(soup),
         "outgoing_links": get_urls_from_html(soup, page_url),
