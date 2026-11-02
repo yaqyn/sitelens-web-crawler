@@ -7,10 +7,15 @@ from crawl import (
     get_urls_from_html,
     get_images_from_html,
     extract_page_data,
+    count_link_destinations,
 )
 
 
 class TestCrawl(unittest.TestCase):
+    def test_link_destinations_are_classified_by_host(self):
+        urls = ["https://example.com/guide", "http://EXAMPLE.com/help", "https://outside.test/"]
+        self.assertEqual(count_link_destinations(urls, "https://example.com/start"), {"internal": 2, "external": 1})
+
     def test_word_count_uses_visible_main_content(self):
         html = "<body>Navigation words<main><h1>Useful guide</h1><p>Read it now.</p><script>hidden words</script></main></body>"
         self.assertEqual(get_word_count_from_html(html), 5)
@@ -326,6 +331,7 @@ class TestCrawl(unittest.TestCase):
             "first_paragraph": "This is the first paragraph.",
             "word_count": 9,
             "outgoing_links": ["https://crawler-test.com/link1"],
+            "link_counts": {"internal": 1, "external": 0},
             "image_urls": ["https://crawler-test.com/image1.jpg"],
         }
         self.assertEqual(actual, expected)

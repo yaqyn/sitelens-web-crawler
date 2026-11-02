@@ -15,6 +15,7 @@ class PageData(TypedDict):
     first_paragraph: str
     word_count: int
     outgoing_links: list[str]
+    link_counts: dict[str, int]
     image_urls: list[str]
 
 
@@ -179,6 +180,13 @@ def get_urls_from_html(html, base_url):
     return urls
 
 
+def count_link_destinations(urls: list[str], page_url: str) -> dict[str, int]:
+    """Summarize same-host and external web destinations."""
+    page_host = (urlsplit(page_url).hostname or "").casefold()
+    internal = sum((urlsplit(url).hostname or "").casefold() == page_host for url in urls)
+    return {"internal": internal, "external": len(urls) - internal}
+
+
 def _srcset_urls(value):
     """Return candidate URLs using the HTML srcset token boundaries."""
     urls = []
@@ -253,6 +261,7 @@ def get_images_from_html(html, base_url):
 
 def extract_page_data(html: str, page_url: str) -> PageData:
     soup = BeautifulSoup(html, "html.parser")
+    outgoing_links = get_urls_from_html(soup, page_url)
     return {
         "url": page_url,
         "title": get_title_from_html(soup),
@@ -264,6 +273,7 @@ def extract_page_data(html: str, page_url: str) -> PageData:
         "heading": get_heading_from_html(soup),
         "first_paragraph": get_first_paragraph_from_html(soup),
         "word_count": get_word_count_from_html(soup),
-        "outgoing_links": get_urls_from_html(soup, page_url),
+        "outgoing_links": outgoing_links,
+        "link_counts": count_link_destinations(outgoing_links, page_url),
         "image_urls": get_images_from_html(soup, page_url),
     }
