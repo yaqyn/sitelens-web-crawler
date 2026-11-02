@@ -13,6 +13,7 @@ class PageData(TypedDict):
     alternate_languages: list[dict[str, str]]
     heading: str
     first_paragraph: str
+    word_count: int
     outgoing_links: list[str]
     image_urls: list[str]
 
@@ -101,6 +102,15 @@ def get_first_paragraph_from_html(html: str | BeautifulSoup) -> str:
         p_tag = soup.find("p")
 
     return " ".join(p_tag.stripped_strings) if isinstance(p_tag, Tag) else ""
+
+
+def get_word_count_from_html(html: str | BeautifulSoup) -> int:
+    """Count visible content words, excluding non-reader document elements."""
+    soup = html if isinstance(html, BeautifulSoup) else BeautifulSoup(html, "html.parser")
+    for hidden in soup.select("script, style, template, noscript"):
+        hidden.decompose()
+    content = soup.find("main") or soup.find("body") or soup
+    return len(" ".join(content.stripped_strings).split())
 
 
 def _document_base_url(soup: BeautifulSoup, base_url: str) -> str:
@@ -253,6 +263,7 @@ def extract_page_data(html: str, page_url: str) -> PageData:
         "alternate_languages": get_alternate_languages_from_html(soup, page_url),
         "heading": get_heading_from_html(soup),
         "first_paragraph": get_first_paragraph_from_html(soup),
+        "word_count": get_word_count_from_html(soup),
         "outgoing_links": get_urls_from_html(soup, page_url),
         "image_urls": get_images_from_html(soup, page_url),
     }

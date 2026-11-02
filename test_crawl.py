@@ -3,6 +3,7 @@ from crawl import (
     normalize_url,
     get_heading_from_html,
     get_first_paragraph_from_html,
+    get_word_count_from_html,
     get_urls_from_html,
     get_images_from_html,
     extract_page_data,
@@ -10,6 +11,10 @@ from crawl import (
 
 
 class TestCrawl(unittest.TestCase):
+    def test_word_count_uses_visible_main_content(self):
+        html = "<body>Navigation words<main><h1>Useful guide</h1><p>Read it now.</p><script>hidden words</script></main></body>"
+        self.assertEqual(get_word_count_from_html(html), 5)
+
     def test_malformed_urls_do_not_discard_valid_page_data(self):
         result = extract_page_data(
             '<h1>Useful page</h1><a href="http://[">bad</a><a href="/valid">good</a>'
@@ -319,6 +324,7 @@ class TestCrawl(unittest.TestCase):
             "alternate_languages": [],
             "heading": "Test Title",
             "first_paragraph": "This is the first paragraph.",
+            "word_count": 9,
             "outgoing_links": ["https://crawler-test.com/link1"],
             "image_urls": ["https://crawler-test.com/image1.jpg"],
         }
