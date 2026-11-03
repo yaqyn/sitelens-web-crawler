@@ -2,6 +2,7 @@ import unittest
 from crawl import (
     normalize_url,
     get_heading_from_html,
+    get_heading_counts_from_html,
     get_first_paragraph_from_html,
     get_word_count_from_html,
     get_urls_from_html,
@@ -12,6 +13,10 @@ from crawl import (
 
 
 class TestCrawl(unittest.TestCase):
+    def test_heading_counts_cover_the_document_outline(self):
+        html = "<h1>Title</h1><h2>One</h2><h2>Two</h2><h4>Deep</h4>"
+        self.assertEqual(get_heading_counts_from_html(html), {"h1": 1, "h2": 2, "h3": 0, "h4": 1, "h5": 0, "h6": 0})
+
     def test_link_destinations_are_classified_by_host(self):
         urls = ["https://example.com/guide", "http://EXAMPLE.com/help", "https://outside.test/"]
         self.assertEqual(count_link_destinations(urls, "https://example.com/start"), {"internal": 2, "external": 1})
@@ -328,6 +333,7 @@ class TestCrawl(unittest.TestCase):
             "robots": [],
             "alternate_languages": [],
             "heading": "Test Title",
+            "heading_counts": {"h1": 1, "h2": 0, "h3": 0, "h4": 0, "h5": 0, "h6": 0},
             "first_paragraph": "This is the first paragraph.",
             "word_count": 9,
             "outgoing_links": ["https://crawler-test.com/link1"],
