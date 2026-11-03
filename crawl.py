@@ -13,6 +13,7 @@ class PageData(TypedDict):
     alternate_languages: list[dict[str, str]]
     heading: str
     heading_counts: dict[str, int]
+    form_summary: dict[str, int]
     first_paragraph: str
     word_count: int
     outgoing_links: list[str]
@@ -45,6 +46,15 @@ def get_heading_from_html(html: str | BeautifulSoup) -> str:
 def get_heading_counts_from_html(html: str | BeautifulSoup) -> dict[str, int]:
     soup = html if isinstance(html, BeautifulSoup) else BeautifulSoup(html, "html.parser")
     return {f"h{level}": len(soup.find_all(f"h{level}")) for level in range(1, 7)}
+
+
+def get_form_summary_from_html(html: str | BeautifulSoup) -> dict[str, int]:
+    soup = html if isinstance(html, BeautifulSoup) else BeautifulSoup(html, "html.parser")
+    forms = soup.find_all("form")
+    return {
+        "forms": len(forms),
+        "controls": sum(len(form.select("input, select, textarea, button")) for form in forms),
+    }
 
 
 def get_title_from_html(html: str | BeautifulSoup) -> str:
@@ -278,6 +288,7 @@ def extract_page_data(html: str, page_url: str) -> PageData:
         "alternate_languages": get_alternate_languages_from_html(soup, page_url),
         "heading": get_heading_from_html(soup),
         "heading_counts": get_heading_counts_from_html(soup),
+        "form_summary": get_form_summary_from_html(soup),
         "first_paragraph": get_first_paragraph_from_html(soup),
         "word_count": get_word_count_from_html(soup),
         "outgoing_links": outgoing_links,

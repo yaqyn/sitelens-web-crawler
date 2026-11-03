@@ -3,6 +3,7 @@ from crawl import (
     normalize_url,
     get_heading_from_html,
     get_heading_counts_from_html,
+    get_form_summary_from_html,
     get_first_paragraph_from_html,
     get_word_count_from_html,
     get_urls_from_html,
@@ -13,6 +14,10 @@ from crawl import (
 
 
 class TestCrawl(unittest.TestCase):
+    def test_form_summary_counts_only_controls_inside_forms(self):
+        html = '<input outside><form><input><select><option>x</option></select></form><form><textarea></textarea><button>Go</button></form>'
+        self.assertEqual(get_form_summary_from_html(html), {"forms": 2, "controls": 4})
+
     def test_heading_counts_cover_the_document_outline(self):
         html = "<h1>Title</h1><h2>One</h2><h2>Two</h2><h4>Deep</h4>"
         self.assertEqual(get_heading_counts_from_html(html), {"h1": 1, "h2": 2, "h3": 0, "h4": 1, "h5": 0, "h6": 0})
@@ -334,6 +339,7 @@ class TestCrawl(unittest.TestCase):
             "alternate_languages": [],
             "heading": "Test Title",
             "heading_counts": {"h1": 1, "h2": 0, "h3": 0, "h4": 0, "h5": 0, "h6": 0},
+            "form_summary": {"forms": 0, "controls": 0},
             "first_paragraph": "This is the first paragraph.",
             "word_count": 9,
             "outgoing_links": ["https://crawler-test.com/link1"],
