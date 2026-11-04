@@ -5,6 +5,7 @@ from crawl import (
     get_heading_counts_from_html,
     get_form_summary_from_html,
     get_image_summary_from_html,
+    get_landmark_summary_from_html,
     get_first_paragraph_from_html,
     get_word_count_from_html,
     get_urls_from_html,
@@ -15,6 +16,9 @@ from crawl import (
 
 
 class TestCrawl(unittest.TestCase):
+    def test_landmark_summary_counts_semantic_regions(self):
+        html = "<header></header><nav></nav><main></main><aside></aside><aside></aside><footer></footer><div role='main'></div>"
+        self.assertEqual(get_landmark_summary_from_html(html), {"main": 1, "nav": 1, "header": 1, "footer": 1, "aside": 2})
     def test_image_summary_is_scoped_to_image_elements(self):
         html = '<img src="one.png" alt="Cover"><img src="decorative.png" alt=""><img src="missing.png"><video poster="poster.png"><source src="movie.webm"></video><picture><source srcset="wide.webp"></picture>'
         self.assertEqual(get_image_summary_from_html(html), {"images": 3, "with_alt": 2, "empty_alt": 1})
@@ -345,6 +349,7 @@ class TestCrawl(unittest.TestCase):
             "heading_counts": {"h1": 1, "h2": 0, "h3": 0, "h4": 0, "h5": 0, "h6": 0},
             "form_summary": {"forms": 0, "controls": 0},
             "image_summary": {"images": 1, "with_alt": 1, "empty_alt": 0},
+            "landmark_summary": {"main": 0, "nav": 0, "header": 0, "footer": 0, "aside": 0},
             "first_paragraph": "This is the first paragraph.",
             "word_count": 9,
             "outgoing_links": ["https://crawler-test.com/link1"],
