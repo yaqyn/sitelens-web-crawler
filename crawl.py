@@ -16,6 +16,7 @@ class PageData(TypedDict):
     form_summary: dict[str, int]
     image_summary: dict[str, int]
     landmark_summary: dict[str, int]
+    link_accessibility_summary: dict[str, int]
     first_paragraph: str
     word_count: int
     outgoing_links: list[str]
@@ -72,6 +73,23 @@ def get_image_summary_from_html(html: str | BeautifulSoup) -> dict[str, int]:
 def get_landmark_summary_from_html(html: str | BeautifulSoup) -> dict[str, int]:
     soup = html if isinstance(html, BeautifulSoup) else BeautifulSoup(html, "html.parser")
     return {name: len(soup.find_all(name)) for name in ("main", "nav", "header", "footer", "aside")}
+
+
+def get_link_accessibility_summary_from_html(html: str | BeautifulSoup) -> dict[str, int]:
+    """Count anchors with a text, aria, or image-alt accessible name."""
+    soup = html if isinstance(html, BeautifulSoup) else BeautifulSoup(html, "html.parser")
+    links = soup.find_all("a", href=True)
+    named = 0
+    for link in links:
+        aria = link.get("aria-label")
+        text_name = " ".join(link.stripped_strings)
+        image_name = any(
+            isinstance(image.get("alt"), str) and image.get("alt").strip()
+            for image in link.find_all("img")
+        )
+        if text_name or isinstance(aria, str) and aria.strip() or image_name:
+            named += 1
+    return {"links": len(links), "named": named, "unnamed": len(links) - named}
 
 
 def get_title_from_html(html: str | BeautifulSoup) -> str:
@@ -308,6 +326,7 @@ def extract_page_data(html: str, page_url: str) -> PageData:
         "form_summary": get_form_summary_from_html(soup),
         "image_summary": get_image_summary_from_html(soup),
         "landmark_summary": get_landmark_summary_from_html(soup),
+        "link_accessibility_summary": get_link_accessibility_summary_from_html(soup),
         "first_paragraph": get_first_paragraph_from_html(soup),
         "word_count": get_word_count_from_html(soup),
         "outgoing_links": outgoing_links,
