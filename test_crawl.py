@@ -7,6 +7,7 @@ from crawl import (
     get_image_summary_from_html,
     get_landmark_summary_from_html,
     get_link_accessibility_summary_from_html,
+    get_metadata_summary_from_html,
     get_first_paragraph_from_html,
     get_word_count_from_html,
     get_urls_from_html,
@@ -22,6 +23,11 @@ class TestCrawl(unittest.TestCase):
             <a href="/image"><img src="cover.png" alt="Cover"></a><a href="/empty"><img src="decorative.png" alt=""></a>
             <link href="/stylesheet"><area href="/map" alt="Map"><a>No destination</a>'''
         self.assertEqual(get_link_accessibility_summary_from_html(html), {"links": 4, "named": 3, "unnamed": 1})
+
+    def test_metadata_summary_scopes_meta_elements(self):
+        html = '<div charset="utf-8" name="viewport" content="wrong"></div><meta charset="utf-8"><meta name="VIEWPORT" content="width=device-width">'
+        self.assertEqual(get_metadata_summary_from_html(html), {"charset": True, "viewport": True})
+        self.assertEqual(get_metadata_summary_from_html('<div charset="utf-8" name="viewport"></div>'), {"charset": False, "viewport": False})
 
     def test_landmark_summary_counts_semantic_regions(self):
         html = "<header></header><nav></nav><main></main><aside></aside><aside></aside><footer></footer><div role='main'></div>"
@@ -358,6 +364,7 @@ class TestCrawl(unittest.TestCase):
             "image_summary": {"images": 1, "with_alt": 1, "empty_alt": 0},
             "landmark_summary": {"main": 0, "nav": 0, "header": 0, "footer": 0, "aside": 0},
             "link_accessibility_summary": {"links": 1, "named": 1, "unnamed": 0},
+            "metadata_summary": {"charset": False, "viewport": True},
             "first_paragraph": "This is the first paragraph.",
             "word_count": 9,
             "outgoing_links": ["https://crawler-test.com/link1"],

@@ -17,6 +17,7 @@ class PageData(TypedDict):
     image_summary: dict[str, int]
     landmark_summary: dict[str, int]
     link_accessibility_summary: dict[str, int]
+    metadata_summary: dict[str, bool]
     first_paragraph: str
     word_count: int
     outgoing_links: list[str]
@@ -90,6 +91,23 @@ def get_link_accessibility_summary_from_html(html: str | BeautifulSoup) -> dict[
         if text_name or isinstance(aria, str) and aria.strip() or image_name:
             named += 1
     return {"links": len(links), "named": named, "unnamed": len(links) - named}
+
+
+def get_metadata_summary_from_html(html: str | BeautifulSoup) -> dict[str, bool]:
+    """Report document metadata declared by actual meta elements."""
+    soup = html if isinstance(html, BeautifulSoup) else BeautifulSoup(html, "html.parser")
+    has_charset = any(
+        isinstance(meta.get("charset"), str) and bool(meta.get("charset").strip())
+        for meta in soup.find_all("meta")
+    )
+    has_viewport = any(
+        isinstance(meta.get("name"), str)
+        and meta.get("name").strip().casefold() == "viewport"
+        and isinstance(meta.get("content"), str)
+        and bool(meta.get("content").strip())
+        for meta in soup.find_all("meta")
+    )
+    return {"charset": has_charset, "viewport": has_viewport}
 
 
 def get_title_from_html(html: str | BeautifulSoup) -> str:
@@ -327,6 +345,7 @@ def extract_page_data(html: str, page_url: str) -> PageData:
         "image_summary": get_image_summary_from_html(soup),
         "landmark_summary": get_landmark_summary_from_html(soup),
         "link_accessibility_summary": get_link_accessibility_summary_from_html(soup),
+        "metadata_summary": get_metadata_summary_from_html(soup),
         "first_paragraph": get_first_paragraph_from_html(soup),
         "word_count": get_word_count_from_html(soup),
         "outgoing_links": outgoing_links,
