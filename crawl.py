@@ -176,8 +176,10 @@ def get_first_paragraph_from_html(html: str | BeautifulSoup) -> str:
 
 def get_word_count_from_html(html: str | BeautifulSoup) -> int:
     """Count visible content words, excluding non-reader document elements."""
-    soup = html if isinstance(html, BeautifulSoup) else BeautifulSoup(html, "html.parser")
-    for hidden in soup.select("script, style, template, noscript"):
+    # Work on a separate parse so visibility filtering cannot remove resources
+    # from the shared document used by the other extractors.
+    soup = BeautifulSoup(str(html), "html.parser")
+    for hidden in soup.select("head, title, script, style, template, noscript, [hidden]"):
         hidden.decompose()
     content = soup.find("main") or soup.find("body") or soup
     return len(" ".join(content.stripped_strings).split())

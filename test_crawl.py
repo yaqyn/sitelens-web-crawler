@@ -1,4 +1,5 @@
 import unittest
+from bs4 import BeautifulSoup
 from crawl import (
     normalize_url,
     get_heading_from_html,
@@ -50,6 +51,22 @@ class TestCrawl(unittest.TestCase):
     def test_word_count_uses_visible_main_content(self):
         html = "<body>Navigation words<main><h1>Useful guide</h1><p>Read it now.</p><script>hidden words</script></main></body>"
         self.assertEqual(get_word_count_from_html(html), 5)
+
+    def test_word_count_excludes_head_and_hidden_attribute_content(self):
+        html = (
+            "<head><title>Metadata title words</title></head>"
+            "<main><h1>Visible guide</h1>"
+            "<section hidden>Draft material must stay excluded</section>"
+            "<p>Read this today.</p></main>"
+        )
+        self.assertEqual(get_word_count_from_html(html), 5)
+        self.assertEqual(
+            get_word_count_from_html("<title>Hidden title</title><p>Visible copy</p>"),
+            2,
+        )
+        soup = BeautifulSoup(html, "html.parser")
+        self.assertEqual(get_word_count_from_html(soup), 5)
+        self.assertIsNotNone(soup.select_one("[hidden]"))
 
     def test_malformed_urls_do_not_discard_valid_page_data(self):
         result = extract_page_data(
