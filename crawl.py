@@ -303,10 +303,16 @@ def get_images_from_html(html, base_url):
 
     # A source element describes an image only when it belongs to a picture.
     # Audio and video source URLs must not leak into the image inventory.
-    for img_tag in soup.select("img, picture source, video[poster]"):
+    for img_tag in soup.select(
+        'img, picture source, video[poster], input[type="image" i][src], link[rel~="icon" i][href]'
+    ):
         candidates = []
         if img_tag.name == "video":
             candidates.append(img_tag.get("poster"))
+        elif img_tag.name == "link":
+            candidates.append(img_tag.get("href"))
+        elif img_tag.name == "input":
+            candidates.append(img_tag.get("src"))
         else:
             for attribute in ("src", "data-src"):
                 if img_tag.get(attribute) is not None:

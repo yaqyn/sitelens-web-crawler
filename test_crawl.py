@@ -289,6 +289,25 @@ class TestCrawl(unittest.TestCase):
             ["https://crawler-test.com/preview.jpg"],
         )
 
+    def test_image_inventory_includes_only_semantic_icon_and_input_images(self):
+        html = (
+            '<link rel="icon" href="/favicon.png">'
+            '<link rel="shortcut ICON" href="/shortcut.png">'
+            '<link rel="stylesheet" href="/site.css">'
+            '<link rel="preload" as="video" href="/movie.mp4">'
+            '<input type="image" src="/submit.png">'
+            '<input type="text" src="/not-an-image.png" data-src="/lazy-field.png">'
+            '<video src="/feature.mp4" data-src="/lazy-video.mp4"></video>'
+        )
+        self.assertEqual(
+            get_images_from_html(html, "https://crawler-test.com/form"),
+            [
+                "https://crawler-test.com/favicon.png",
+                "https://crawler-test.com/shortcut.png",
+                "https://crawler-test.com/submit.png",
+            ],
+        )
+
     def test_get_images_from_html_includes_lazy_loaded_sources(self):
         html = '<img data-src="/lazy.png" data-srcset="/lazy-small.png 1x, /lazy-large.png 2x">'
         self.assertEqual(
