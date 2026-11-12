@@ -95,7 +95,7 @@ Defaults are **5 workers** and **100 scheduled URLs**. Use positive integers. Fa
 
 Robots.txt is checked by default, including before following redirects. A missing file (404) allows crawling; other HTTP failures, redirects on robots.txt, or connection errors block the crawl. A declared `Crawl-delay` raises the configured request interval. Parsing uses Python's [RobotFileParser](https://docs.python.org/3/library/urllib.robotparser.html); this is not a complete implementation of every robots directive.
 
-Redirects are followed only within the original network location and relative links use the final page URL. The original report field names are preserved. Report replacement is atomic, so a failed serialization leaves an existing report intact. A run with no successful pages returns exit status 1; partial success returns 0 and failures are available through `--errors`. Ctrl+C returns 130 and closes workers and connections; interrupted crawls do not write a new report.
+Redirects are followed only within the original network location and relative links use the final page URL. A redirect target is collected once even when the alias and target are both scheduled; the first resolved copy is kept. The original report field names are preserved. Report replacement is atomic, so a failed serialization leaves an existing report intact. A run with no successful pages returns exit status 1; partial success returns 0 and failures are available through `--errors`. Ctrl+C returns 130 and closes workers and connections; interrupted crawls do not write a new report.
 
 ## <img src="readme-assets/icons/workflow.svg" width="24" height="24" alt=""> Report workflow
 
