@@ -59,6 +59,7 @@ class AsyncCrawler:
         self.on_event = on_event
         self.page_data, self.errors = {}, {}
         self.seen = set()
+        self.resolved_urls = set()
         self.queue = asyncio.Queue()
         self.all_tasks = set()
         self.session = None
@@ -174,12 +175,18 @@ class AsyncCrawler:
         while True:
             url, depth, normalized = await self.queue.get()
             try:
+                if normalized in self.resolved_urls:
+                    continue
                 if not self.quiet:
                     print(f"crawling: {url}")
                 self.emit("Fetching", url)
                 html, final_url = await self.get_html(url)
+                final_normalized = normalize_url(final_url)
+                if final_normalized in self.resolved_urls:
+                    continue
                 data = extract_page_data(html, final_url)
                 self.page_data[normalized] = data
+                self.resolved_urls.add(final_normalized)
                 self.emit("Collected", url, data["heading"])
                 for link in data["outgoing_links"]:
                     self.enqueue(link, depth + 1)
