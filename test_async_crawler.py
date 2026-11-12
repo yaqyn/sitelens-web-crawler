@@ -33,6 +33,8 @@ class TestAsyncCrawler(unittest.IsolatedAsyncioTestCase):
             raise web.HTTPFound('http://localhost:1/outside')
         if path == '/to-private':
             raise web.HTTPFound('/private')
+        if path == '/alias':
+            raise web.HTTPFound('/target')
         if path == '/binary':
             return web.Response(body=b'abc', content_type='application/octet-stream')
         if path == '/large':
@@ -49,6 +51,8 @@ class TestAsyncCrawler(unittest.IsolatedAsyncioTestCase):
                 links = ['/a', '/a#fragment', '/b', '/private', '/binary', '/redirect']
             elif path == '/wide':
                 links = [f'/page{i}' for i in range(100)]
+            elif path == '/redirects':
+                links = ['/alias', '/target']
             else:
                 links = ['/deep'] if path == '/a' else []
             html = '<h1>Page</h1><p>Text</p>' + ''.join(f'<a href="{link}">Link</a>' for link in links)
@@ -129,6 +133,13 @@ class TestAsyncCrawler(unittest.IsolatedAsyncioTestCase):
         crawler = await self.crawl('/to-private')
         self.assertEqual(len(crawler.errors), 1)
         self.assertNotIn('/private', self.hits)
+
+    async def test_redirect_target_is_fetched_once_when_alias_is_scheduled_first(self):
+        crawler = await self.crawl('/redirects', max_concurrency=1)
+        self.assertEqual(self.hits.count('/target'), 1)
+        self.assertEqual(len(crawler.page_data), 2)
+        urls = [page['url'] for page in crawler.page_data.values()]
+        self.assertEqual(len(urls), len(set(urls)))
 
     async def test_cli_report(self):
         with tempfile.TemporaryDirectory() as directory:
