@@ -53,6 +53,8 @@ class TestAsyncCrawler(unittest.IsolatedAsyncioTestCase):
                 links = [f'/page{i}' for i in range(100)]
             elif path == '/redirects':
                 links = ['/alias', '/target']
+            elif path == '/direct-first':
+                links = ['/target', '/alias']
             else:
                 links = ['/deep'] if path == '/a' else []
             html = '<h1>Page</h1><p>Text</p>' + ''.join(f'<a href="{link}">Link</a>' for link in links)
@@ -139,6 +141,13 @@ class TestAsyncCrawler(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(self.hits.count('/target'), 1)
         self.assertEqual(len(crawler.page_data), 2)
         urls = [page['url'] for page in crawler.page_data.values()]
+        self.assertEqual(len(urls), len(set(urls)))
+
+    async def test_redirect_alias_does_not_duplicate_target_page(self):
+        crawler = await self.crawl('/direct-first')
+        urls = [page['url'] for page in crawler.page_data.values()]
+        self.assertEqual(len(crawler.page_data), 2)
+        self.assertEqual(urls.count(self.base + '/target'), 1)
         self.assertEqual(len(urls), len(set(urls)))
 
     async def test_cli_report(self):
