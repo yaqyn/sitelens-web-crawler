@@ -183,7 +183,7 @@ class TestCrawl(unittest.TestCase):
         self.assertEqual(actual, expected)
 
     def test_links_honor_document_base_url(self):
-        html = '<base href="https://example.com/docs/"><a href="guide">Guide</a>'
+        html = '<head><base href="https://example.com/docs/"></head><a href="guide">Guide</a>'
         self.assertEqual(
             get_urls_from_html(html, "https://example.com/index.html"),
             ["https://example.com/docs/guide"],
@@ -191,7 +191,7 @@ class TestCrawl(unittest.TestCase):
 
     def test_images_honor_document_base_url(self):
         html = (
-            '<base href="https://cdn.example/assets/">'
+            '<head><base href="https://cdn.example/assets/"></head>'
             '<img src="logo.png" srcset="small.png 1x, large.png 2x">'
         )
         self.assertEqual(
@@ -200,6 +200,26 @@ class TestCrawl(unittest.TestCase):
                 "https://cdn.example/assets/logo.png",
                 "https://cdn.example/assets/small.png",
                 "https://cdn.example/assets/large.png",
+            ],
+        )
+
+    def test_body_base_does_not_change_document_resource_urls(self):
+        html = (
+            '<head></head><body><base href="https://outside.example/assets/">'
+            '<a href="guide">Guide</a><img src="cover.png">'
+            '<picture><source srcset="wide.webp"></picture>'
+            '<video poster="preview.jpg"><source src="movie.webm"></video></body>'
+        )
+        self.assertEqual(
+            get_urls_from_html(html, "https://example.com/docs/page"),
+            ["https://example.com/docs/guide"],
+        )
+        self.assertEqual(
+            get_images_from_html(html, "https://example.com/docs/page"),
+            [
+                "https://example.com/docs/cover.png",
+                "https://example.com/docs/wide.webp",
+                "https://example.com/docs/preview.jpg",
             ],
         )
 
@@ -427,7 +447,7 @@ class TestCrawl(unittest.TestCase):
         self.assertEqual(page["robots"], ["noindex", "follow"])
 
     def test_language_alternates_require_link_elements_and_web_urls(self):
-        html = '''<base href="https://cdn.example/docs/">
+        html = '''<head><base href="https://cdn.example/docs/"></head>
             <link rel="alternate" hreflang="AR" href="arabic">
             <a rel="alternate" hreflang="fr" href="french">wrong element</a>
             <link rel="alternate" hreflang="de" href="mailto:docs@example.com">'''
