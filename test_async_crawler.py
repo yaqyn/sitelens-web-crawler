@@ -37,6 +37,8 @@ class TestAsyncCrawler(unittest.IsolatedAsyncioTestCase):
             raise web.HTTPFound('/target')
         if path == '/binary':
             return web.Response(body=b'abc', content_type='application/octet-stream')
+        if path == '/html-like':
+            return web.Response(body=b'<h1>Not HTML</h1>', headers={'Content-Type': 'text/html-pseudo'})
         if path == '/large':
             return web.Response(text='x' * 2000, content_type='text/html')
         if path == '/flaky':
@@ -119,6 +121,11 @@ class TestAsyncCrawler(unittest.IsolatedAsyncioTestCase):
     async def test_size_limit(self):
         crawler = await self.crawl('/large', max_bytes=100)
         self.assertIn('exceeds', next(iter(crawler.errors.values())))
+
+    async def test_html_like_media_type_is_rejected(self):
+        crawler = await self.crawl('/html-like')
+        self.assertEqual(crawler.page_data, {})
+        self.assertEqual(crawler.errors[self.base + '/html-like'], 'expected text/html content')
 
     async def test_robots_unavailable_blocks_crawl(self):
         self.robots_status = 503

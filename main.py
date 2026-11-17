@@ -17,11 +17,16 @@ from json_report import write_json_report
 USER_AGENT = "SiteLens/2.0"
 
 
+def is_html_content_type(value):
+    """Return whether a Content-Type value declares the HTML media type."""
+    return value.split(";", 1)[0].strip().casefold() == "text/html"
+
+
 def get_html(url):
     """Compatibility helper; the CLI uses the async session exclusively."""
     response = requests.get(url, headers={"User-Agent": USER_AGENT}, timeout=30)
     response.raise_for_status()
-    if not response.headers.get("Content-Type", "").lower().startswith("text/html"):
+    if not is_html_content_type(response.headers.get("Content-Type", "")):
         raise ValueError("expected text/html content")
     return response.text
 
@@ -143,7 +148,7 @@ class AsyncCrawler:
                             current = urldefrag(urljoin(current, location))[0]
                             continue
                         response.raise_for_status()
-                        if not response.headers.get("Content-Type", "").lower().startswith("text/html"):
+                        if not is_html_content_type(response.headers.get("Content-Type", "")):
                             raise ValueError("expected text/html content")
                         return await self.read_body(response), current
                 raise ValueError("Too many redirects")
