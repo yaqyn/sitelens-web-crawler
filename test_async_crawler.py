@@ -133,6 +133,12 @@ class TestAsyncCrawler(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(crawler.page_data, {})
         self.assertEqual(self.hits, ['/robots.txt'])
 
+    async def test_seed_blocked_by_robots_is_reported(self):
+        crawler = await self.crawl('/private')
+        self.assertEqual(crawler.page_data, {})
+        self.assertEqual(crawler.errors, {self.base + '/private': 'Blocked by robots.txt'})
+        self.assertEqual(self.hits, ['/robots.txt'])
+
     async def test_missing_robots_allows_crawl(self):
         self.robots_status = 404
         crawler = await self.crawl(max_depth=0)

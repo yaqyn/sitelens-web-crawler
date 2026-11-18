@@ -207,6 +207,8 @@ class AsyncCrawler:
         if self.session is None:
             raise RuntimeError("Use 'async with AsyncCrawler(...)' before crawling")
         await self.load_robots()
+        if self.robots and not self.errors and not self.robots.can_fetch(USER_AGENT, self.base_url):
+            self.errors[self.base_url] = "Blocked by robots.txt"
         for url, error in self.errors.items():
             self.emit("Blocked", url, error)
         self.enqueue(self.base_url, 0)
