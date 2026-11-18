@@ -108,6 +108,13 @@ class TestAsyncCrawler(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(crawler.page_data), 1)
         self.assertEqual(self.hits, ['/robots.txt', '/'])
 
+    async def test_seed_url_ignores_surrounding_whitespace(self):
+        async with AsyncCrawler(f'  {self.base}/  ', quiet=True, max_depth=0) as crawler:
+            await crawler.crawl()
+        self.assertEqual(crawler.base_url, self.base + '/')
+        self.assertEqual(len(crawler.page_data), 1)
+        self.assertEqual(self.hits, ['/robots.txt', '/'])
+
     async def test_retry(self):
         crawler = await self.crawl('/flaky', retries=1)
         self.assertEqual(self.flaky_attempts, 2)
