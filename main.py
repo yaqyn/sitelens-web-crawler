@@ -34,6 +34,7 @@ def get_html(url):
 def validate_url(url):
     if any(ord(char) < 32 or ord(char) == 127 for char in url):
         raise ValueError("URL must not contain control characters")
+    url = url.strip()
     parsed = urlsplit(url)
     if parsed.scheme not in {"http", "https"} or not parsed.hostname:
         raise ValueError("URL must be an absolute http:// or https:// address")
@@ -47,7 +48,7 @@ class AsyncCrawler:
     def __init__(self, base_url, max_concurrency=5, max_pages=100, *,
                  timeout=30, retries=2, delay=0, max_depth=None,
                  respect_robots=True, max_bytes=2_000_000, quiet=False, on_event=None):
-        validate_url(base_url)
+        base_url = validate_url(base_url)
         if max_concurrency < 1 or max_pages < 1 or max_bytes < 1:
             raise ValueError("Concurrency, page limit, and byte limit must be positive")
         if not math.isfinite(timeout) or not math.isfinite(delay) or timeout <= 0 or retries < 0 or delay < 0:
