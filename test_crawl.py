@@ -223,6 +223,20 @@ class TestCrawl(unittest.TestCase):
             ],
         )
 
+    def test_template_base_does_not_change_document_resource_urls(self):
+        html = (
+            '<head><template><base href="https://outside.example/assets/"></template></head>'
+            '<body><a href="guide">Guide</a><img src="cover.png"></body>'
+        )
+        self.assertEqual(
+            get_urls_from_html(html, "https://example.com/docs/page"),
+            ["https://example.com/docs/guide"],
+        )
+        self.assertEqual(
+            get_images_from_html(html, "https://example.com/docs/page"),
+            ["https://example.com/docs/cover.png"],
+        )
+
     def test_get_urls_from_html_all_links(self):
         input_url = "https://crawler-test.com"
         input_body = """<html><body>

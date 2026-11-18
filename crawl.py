@@ -187,7 +187,7 @@ def get_word_count_from_html(html: str | BeautifulSoup) -> int:
 
 def _document_base_url(soup: BeautifulSoup, base_url: str) -> str:
     head = soup.find("head")
-    base_tag = head.find("base", href=True) if isinstance(head, Tag) else None
+    base_tag = head.find("base", href=True, recursive=False) if isinstance(head, Tag) else None
     if isinstance(base_tag, Tag):
         try:
             candidate = urljoin(base_url, base_tag.get("href"))
